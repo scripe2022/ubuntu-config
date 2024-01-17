@@ -1,0 +1,77 @@
+#!/bin/bash
+p_flag=false
+while getopts 'p' flag; do
+    case "${flag}" in
+        p) p_flag=true ;;
+        *) error "Unexpected option ${flag}" ;;
+    esac
+done
+shift $(($OPTIND -1))
+fullname=$1
+extension="${fullname##*.}"
+filename=${fullname##*/}
+basename="${filename%.*}"
+
+directory="$(realpath $1 | sed 's|\(.*\)/.*|\1|')"
+current="$(pwd)"
+if [[ $current != $directory ]]; then
+    cd_command="cd "$directory
+    eval $cd_command
+fi
+line1=$(head -n 1 $fullname)
+line2=$(head -n 2 $fullname | tail -n 1)
+
+compile_command=""
+run_command=""
+regex_shebang='#!.*$'
+[[ $line1 =~ $regex_shebang ]]
+if [[ $? -eq 0 ]]; then
+	run_command=${line1:2}\ $filename
+fi
+if [[ $line1 =~ "compile:" ]]; then
+    compile_command=${line1##*compile:}
+fi
+if [[ $line1 =~ "run:" ]]; then
+    run_command=${line1##*run:}
+fi
+if [[ $line2 =~ "run:" ]]; then
+    run_command=${line2##*run:}
+fi
+compile_command=$(echo "$compile_command" | sed 's/^[ \t]*//;s/[ \t]*$//')
+run_command=$(echo "$run_command" | sed 's/^[ \t]*//;s/[ \t]*$//')
+compile_command_orig=$compile_command
+run_command_orig=$run_command
+
+GREEN='\033[1;36m'
+NC='\033[0m'
+
+if [[ -n $compile_command ]] || [[ -n $run_command ]]; then
+    if [[ -n $compile_command ]]; then
+        eval "codemd5 -c --file \"$filename\" --args \"$compile_command_orig\""
+        if [[ $? -eq 0 ]] && [[ $p_flag == false ]]; then
+            printf "${GREEN}copmile${NC} files are up to date.\n"
+        else
+            if [[ $p_flag == true ]]; then
+                compile_command="$compile_command >/dev/null 2>&1"
+            fi
+            eval $compile_command
+            if [[ $? -ne 0 ]]; then
+                exit 1
+            fi
+            if [[ $p_flag == false ]]; then
+                printf "${GREEN}compile${NC} $compile_command_orig ${GREEN}done${NC}\n"
+            fi
+            eval "codemd5 -w --file \"$filename\" --args \"$compile_command\""
+        fi
+    fi
+    if [[ -n $run_command ]]; then
+        if [[ $p_flag == false ]]; then
+            echo $run_command_orig
+        fi
+        eval $run_command
+        if [[ $? -ne 0 ]]; then
+            exit 2
+        fi
+    fi
+    exit 0
+fi

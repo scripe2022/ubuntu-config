@@ -1,0 +1,46 @@
+#!/usr/bin/bash
+
+backup() {
+    src=$1
+    dest=$2
+    if [ ! -d "$dest" ]; then
+        mkdir -p "$dest"
+        mv "$src"/* "$dest"
+        if [ $? -eq 0 ]; then
+            echo "Backup successful."
+            echo "Total files: $(ls -1 $dest | wc -l)"
+            echo "Total size: $(du -sh $dest | cut -f1)"
+            echo "Backup location: $dest"
+        else
+            echo "Error in backup. dest = $dest"
+        fi
+    else
+        echo "Aborted. $dest already exists."
+    fi
+}
+
+YEAR=$(date +%Y)
+MONTH=$(date +%m)
+DAY=$(date +%d)
+
+BASE_DIR="/media/jyh/HDD/ubuntu_backups"
+DOWNLOAD="downloads"
+DESKTOP="desktop"
+
+for arg in "$@"; do
+    lower_arg=${arg,,}
+    case $lower_arg in
+        --desktop)
+            backup_dir="$BASE_DIR/$DESKTOP/$YEAR/$MONTH/$DAY"
+            backup "$HOME/Desktop" "$backup_dir"
+            ;;
+        --download| --downloads)
+            backup_dir="$BASE_DIR/$DOWNLOAD/$YEAR/$MONTH/$DAY"
+            backup "$HOME/Downloads" "$backup_dir"
+            ;;
+        *)
+            echo "Invalid argument: $arg"
+            exit 1
+            ;;
+    esac
+done
