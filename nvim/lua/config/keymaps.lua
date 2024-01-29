@@ -6,14 +6,11 @@ local map = vim.keymap.set
 
 map({ "i", "n" }, "<esc>", "<esc>", { noremap = true, desc = "Escape" })
 
-local Term = require('toggleterm.terminal').Terminal
-local term_obj = Term:new()
-
 map({"n", "i", "v"}, "<C-n>", "<cmd>nohl<cr>", { desc = "Clear highlights" })
 map({"n", "i", "v"}, "<C-m>", function() require("notify").dismiss() end, { desc = "Dismiss notifications" })
 
 local quickrun = function()
-    vim.api.nvim_command("write")
+    -- vim.api.nvim_command("write")
     local filename = vim.fn.expand("%:t")
     local tmpout = '/tmp/lua_execute_tmp_out'
     local tmperr = '/tmp/lua_execute_tmp_err'
@@ -39,17 +36,43 @@ end
 map({"n"}, "<leader>r", quickrun, { desc = "Quickrun" })
 map({"n", "v"}, "-", "^", { desc = "Go to first non-blank character of line" })
 
-local toggleTerm = function()
-    if term_obj:is_open() then
-        term_obj:close()
-    else
-        term_obj:open()
+-- 1: horizontal, 2: vertical
+local termDir = 0
+local lastCmd = ""
+local toggleTermTab = function()
+    if termDir == 0 then
+        termDir = 2
+    elseif termDir == 1 or termDir == 2 then
+        termDir = 0
+    end
+    vim.cmd("ToggleTerm size=20 direction=horizontal")
+end
+map({"n", "i", "v", "t"}, "<S-Tab>", toggleTermTab, { desc = "Toggle terminal" })
+
+local changeTodoToDone = function()
+    local line = vim.api.nvim_get_current_line()
+    local todoIndex = string.find(line, "TODO:")
+    local fixIndex = string.find(line, "FIX:")
+    local noteIndex = string.find(line, "NOTE:")
+    local hackIndex = string.find(line, "HACK:")
+    if todoIndex then
+        line = string.sub(line, 1, todoIndex-1) .. "DONE: " .. string.sub(line, todoIndex+5)
+        vim.api.nvim_set_current_line(line)
+    elseif fixIndex then
+        line = string.sub(line, 1, fixIndex-1) .. "DONE: " .. string.sub(line, fixIndex+4)
+        vim.api.nvim_set_current_line(line)
+    elseif noteIndex then
+        line = string.sub(line, 1, noteIndex-1) .. "DONE: " .. string.sub(line, noteIndex+5)
+        vim.api.nvim_set_current_line(line)
+    elseif hackIndex then
+        line = string.sub(line, 1, hackIndex-1) .. "DONE: " .. string.sub(line, hackIndex+5)
+        vim.api.nvim_set_current_line(line)
     end
 end
-map({"n", "i", "v", "t"}, "<S-Tab>", toggleTerm, { desc = "Toggle terminal" })
 
 map({"n", "i", "v"}, "<A-;>", function() local line = vim.api.nvim_get_current_line() vim.api.nvim_set_current_line(line .. ";") end, { desc = "Append semicolon" })
 map({"n", "i", "v"}, "<A-,>", function() local line = vim.api.nvim_get_current_line() vim.api.nvim_set_current_line(line .. ",") end, { desc = "Append comma" })
+map("n", "<leader>dd", changeTodoToDone, { desc = "change TODO to DONE" })
 map("i", "<A-[>", "<Esc>$A {}<Left>", { desc = "Append bracket" })
 map("n", "<A-[>", "$A {}<Left>", { desc = "Append bracket" })
 
@@ -58,31 +81,28 @@ map("n", "<leader>W", function()
     vim.schedule(function() vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("gsa", true, true, true), "v", true) end)
 end, { desc = "Select word and append char" })
 
--- local savedFilename = ""
 local compAndRunCur = function()
     vim.cmd('write')
     local filename = vim.fn.expand("%:t")
-    -- savedFilename = filename
-    if term_obj:is_open() then
-        term_obj:send("quickrun " .. filename)
+    lastCmd = "quickrun " .. filename
+    if termDir == 2 then
+        vim.cmd("TermExec cmd=\"" .. "quickrun " .. filename .. "\"")
     else
-        term_obj:open()
-        term_obj:send("quickrun " .. filename)
+        vim.cmd("ToggleTerm size=20 direction=horizontal")
+        vim.cmd("TermExec go_back=0 cmd=\"" .. "quickrun " .. filename .. "\"")
+        if termDir == 0 then
+            termDir = 2
+        elseif termDir == 1 or termDir == 2 then
+            termDir = 0
+        end
+        -- vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('a', true, true, true), 'n', true)
     end
 end
 local compAndRunOther = function()
-    local previous_id = vim.fn.bufnr('#')
-    local filename = vim.api.nvim_buf_get_name(1)
-    -- if (savedFilename == "") then
-    --     return
-    -- end
-    -- local filename = savedFilename
-    if term_obj:is_open() then
-        term_obj:send("quickrun " .. filename)
-    else
-        term_obj:open()
-        term_obj:send("quickrun " .. filename)
+    if lastCmd == "" then
+        return
     end
+    vim.cmd("TermExec go_back=0 cmd=\"" .. lastCmd .. "\"")
 end
 map({"n", "i", "v"}, "<C-`>", compAndRunCur)
 map("t", "<C-`>", compAndRunOther)
@@ -177,18 +197,18 @@ function DelMarksOnCurrentLine()
     end
 end
 
-map("n", "<leader>mc", "<cmd>delmarks a-zA-Z0-9<CR>", { noremap = true, silent = true, desc = "Delete all marks" })
-map("n", "<leader>mf", DelMarksOnCurrentLine, { noremap = true, silent = true, desc = "Delete all marks" })
+map("n", "<leader>m1", "<cmd>delmarks a-zA-Z0-9<CR>", { noremap = true, silent = true, desc = "Delete all marks" })
+map("n", "<leader>m2", DelMarksOnCurrentLine, { noremap = true, silent = true, desc = "Delete all marks" })
 
 for char = 65, 90 do
     local ch = string.char(char)
-    map("n", "`" .. ch, "<cmd>mark " .. ch .. "<CR>", { noremap = true, silent = true, desc = "add mark" .. ch })
-    map("n", "m" .. ch, "`" .. ch, { noremap = true, silent = true, desc = "goto mark" .. ch })
+    map("n", "<leader>m" .. ch, "<cmd>mark " .. ch .. "<CR>", { noremap = true, silent = true, desc = "add mark " .. ch })
+    map("n", "m" .. ch, "`" .. ch, { noremap = true, silent = true, desc = "goto mark " .. ch })
 end
 for char = 97, 122 do
     local ch = string.char(char)
-    map("n", "`" .. ch, "<cmd>mark " .. ch .. "<CR>", { noremap = true, silent = true, desc = "add mark" .. ch })
-    map("n", "m" .. ch, "`" .. ch, { noremap = true, silent = true, desc = "goto mark" .. ch })
+    map("n", "<leader>m" .. ch, "<cmd>mark " .. ch .. "<CR>", { noremap = true, silent = true, desc = "add mark " .. ch })
+    map("n", "m" .. ch, "`" .. ch, { noremap = true, silent = true, desc = "goto mark " .. ch })
 end
 
 function debugProcess()
@@ -263,3 +283,48 @@ function debugProcess()
     dap.run(config)
 end
 map("n", "<leader>dm", debugProcess, {desc = "CP debug"})
+
+map("n", "<leader>uu", function() require("telescope").extensions.undo.undo() end )
+map("n", "<leader>1", function() vim.cmd('write') end)
+
+map("n", "<leader>aw", "/\\<\\><Left><Left>", { noremap = true, silent = true })
+map("v", "<C-x>", "\"0d", { noremap = true })
+map("v", "<C-c>", "\"0y", { noremap = true })
+
+local function ctrlv()
+    local register = "0"
+    local content = vim.fn.getreg(register)
+    local cursor_pos = vim.api.nvim_win_get_cursor(0)
+    local line = cursor_pos[1]
+    local col = cursor_pos[2]
+    vim.api.nvim_buf_set_text(0, line - 1, col, line - 1, col, {content})
+    local new_col = col + #content
+    vim.api.nvim_win_set_cursor(0, {line, new_col})
+end
+map("i", "<C-v>", ctrlv, { noremap = true })
+map({"n", "v"}, "<C-v>", "\"0p", { noremap = true })
+
+map("i", "<C-a>", "<Esc>A", { noremap = true })
+map("n", "<C-a>", "A", { noremap = true })
+
+-- local function toggle_term()
+--     local size = math.floor(vim.o.columns * 0.5)
+--     vim.cmd("ToggleTerm size=" .. size .. " direction=vertical")
+--     vim.cmd("ToggleTermOpen")
+-- end
+
+-- map({"n", "i", "v", "t"}, "<C-\\>", toggle_term, { desc = "Toggle terminal Vertical" })
+
+local toggleTermWin = function()
+    if termDir == 0 then
+        termDir = 2
+    elseif termDir == 1 or termDir == 2 then
+        termDir = 0
+    end
+    local size = math.floor(vim.o.columns * 0.4)
+    vim.cmd("ToggleTerm size=" .. size .. " direction=vertical")
+    vim.cmd("wincmd p")
+    vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<esc>', true, true, true), 'i', true)
+end
+
+map({"n", "i", "v", "t"}, "<C-\\>", toggleTermWin, { desc = "Toggle terminal Vertical" })

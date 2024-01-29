@@ -31,6 +31,11 @@ fi
 
 file=$(echo $file | xargs)
 args=$(echo $args | xargs)
+
+if [[ $args == *"make"* ]] && [[ $option == "-c" ]]; then
+    exit 4
+fi
+
 if [ ! -f "$file" ]; then
     echo "Error: File '$file' not found."
     exit 1

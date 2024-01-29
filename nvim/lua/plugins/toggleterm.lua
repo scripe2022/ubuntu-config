@@ -3,8 +3,8 @@ return {
         'akinsho/toggleterm.nvim',
         version = "*",
         opts = {
-            direction = 'horizontal',
-            size = 20
-        }
+            -- direction = 'horizontal | vertical',
+            -- size = 20 | 100,
+        },
     }
 }

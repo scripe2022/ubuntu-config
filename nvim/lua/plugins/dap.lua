@@ -11,31 +11,32 @@ return {
                 keys = {
                     { "<leader>du", function() require("dapui").toggle({ }) end, desc = "Dap UI" },
                     { "<leader>de", function() require("dapui").eval() end, desc = "Eval", mode = {"n", "v"} },
-                    { "<C-p>", function() require("dapui").eval() end, desc = "Eval", mode = {"n", "v"} },
+                    -- { "<C-p>", function() require("dapui").eval() end, desc = "Eval", mode = {"n", "v"} },
                 },
                 opts = {
                     layouts = {
                         {
                             elements = {
-                                -- { id = "repl", size = 0.5 },
-                                -- { id = "console", size = 0.5 }
-                                { id = "watches", size = 0.5 },
-                                { id = "scopes", size = 0.5 }
-                            },
-                            position = "bottom",
-                            size = 25
-                        },
-                        {
-                            elements = {
                                 -- { id = "scopes", size = 0.25 },
-                                { id = "repl", size = 0.17 },
-                                { id = "console", size = 0.17 },
-                                { id = "breakpoints", size = 0.33 },
-                                { id = "stacks", size = 0.33 },
+                                { id = "repl", size = 0.15 },
+                                -- { id = "console", size = 0.25 },
+                                { id = "breakpoints", size = 0.25 },
+                                { id = "stacks", size = 0.25 },
+                                { id = "watches", size = 0.35 },
                                 -- { id = "watches", size = 0.25 }
                             },
                             position = "left",
                             size = 40
+                        },
+                        {
+                            elements = {
+                                -- { id = "repl", size = 0.5 },
+                                -- { id = "console", size = 0.5 }
+                                { id = "scopes", size = 0.5 },
+                                { id = "scopes", size = 0.5 }
+                            },
+                            position = "bottom",
+                            size = 26
                         },
                     }
                 },
@@ -123,5 +124,7 @@ return {
             { "<leader>dw", function() require("dap.ui.widgets").hover() end, desc = "Widgets" },
 
         },
+        config = function()
+        end
     }
 }
