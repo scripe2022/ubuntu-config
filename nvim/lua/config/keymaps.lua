@@ -321,10 +321,12 @@ local toggleTermWin = function()
     elseif termDir == 1 or termDir == 2 then
         termDir = 0
     end
-    local size = math.floor(vim.o.columns * 0.4)
+    local size = math.floor(vim.o.columns * 0.5)
     vim.cmd("ToggleTerm size=" .. size .. " direction=vertical")
     vim.cmd("wincmd p")
     vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<esc>', true, true, true), 'i', true)
 end
 
-map({"n", "i", "v", "t"}, "<C-\\>", toggleTermWin, { desc = "Toggle terminal Vertical" })
+map("n", "<leader>\\", toggleTermWin, { desc = "Toggle terminal Vertical" })
+map("n", "<A-c>", "<cmd>CopilotChatInPlace<CR>", { desc = "Open chat" })
+
