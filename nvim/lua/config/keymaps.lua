@@ -330,3 +330,11 @@ end
 map("n", "<leader>\\", toggleTermWin, { desc = "Toggle terminal Vertical" })
 map("n", "<A-c>", "<cmd>CopilotChatInPlace<CR>", { desc = "Open chat" })
 
+-- kitty and vim integration
+map('n', '<C-j>', ':KittyNavigateDown<CR>', { noremap = true, silent = true })
+map('n', '<C-k>', ':KittyNavigateUp<CR>', { noremap = true, silent = true })
+map('n', '<C-l>', ':KittyNavigateRight<CR>', { noremap = true, silent = true })
+map('n', '<C-h>', ':KittyNavigateLeft<CR>', { noremap = true, silent = true })
+map('n', "<f2>", "<cmd>ZenMode<CR>", { desc = "Quickrun" })
+map('n', "<leader>pmd", "<cmd>MarkdownPreview<CR>", { desc = "Markdown Preview" })
+map('n', "<leader>pms", "<cmd>MarkdownPreviewStop<CR>", { desc = "Markdown Preview" })

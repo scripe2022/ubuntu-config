@@ -7,3 +7,4 @@ mkdir bin
 sudo cp -r /usr/bin/quickrun ./bin/
 sudo cp -r /usr/bin/codemd5 ./bin/
 sudo cp -r /usr/bin/backup ./bin/
+

@@ -32,6 +32,7 @@ return {{
         cpp = { "clangformat" },
         c = { "clangformat" },
         cuda = { "clangformat" },
+        ['python'] = { "black" },
       },
       -- The options you set here will be merged with the builtin formatters.
       -- You can also define any custom formatters here.
@@ -42,6 +43,10 @@ return {{
             command = "clang-format",
             args = { "-style=file:/usr/local/src/config/.clang-format" },
         },
+        -- black = {
+        --     command = "black",
+        --     args = { "--quiet", "-", "-l", "120", "t", "py37"},
+        -- }
         -- # Example of using dprint only when a dprint.json file is present
         -- dprint = {
         --   condition = function(ctx)
