@@ -3,14 +3,14 @@ return {
         "header",
         fmt(
             -- "// compile: make " .. vim.fn.expand("%:t:r") .. "\n" ..
-            "// compile: g++ ".. vim.fn.expand("%:t") .. " /usr/include/c++/12/debug/cpglib/print.o -o " .. vim.fn.expand("%:t:r") .. " -O1 -std=gnu++20 -Wall -Wextra -Wshadow -D_GLIBCXX_ASSERTIONS -fmax-errors=2 -DLOCAL\n" ..
+            "// compile: g++ ".. vim.fn.expand("%:t") .. " /home/jyh/.local/include/cpglib/print.o -o " .. vim.fn.expand("%:t:r") .. " -O1 -std=gnu++20 -Wall -Wextra -Wshadow -D_GLIBCXX_ASSERTIONS -fmax-errors=2 -DLOCAL\n" ..
             "// run: ./" .. vim.fn.expand("%:t:r") .. " < data.in\n" ..
             "#include <bits/stdc++.h>\n" ..
             "using namespace std;\n" ..
             "#pragma GCC optimize(\"unroll-loops\")\n" ..
             "#pragma GCC target(\"avx2,bmi,bmi2,lzcnt,popcnt\")\n" ..
             "#ifdef LOCAL\n" ..
-            "#include <debug/cpglib/print.h>\n" ..
+            "#include <cpglib/print.h>\n" ..
             "#define debug(x...) _debug_print(0, #x, x);\n" ..
             "#define Debug(x...) _debug_print(1, #x, x);\n" ..
             "#define DEBUG(x...) _debug_print(2, #x, x);\n" ..

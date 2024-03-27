@@ -7,6 +7,11 @@ while getopts 'p' flag; do
     esac
 done
 shift $(($OPTIND -1))
+if [ $# -eq 0 ]; then
+    echo "Error: No file name provided."
+    echo "Usage: $0 [-p] <filename>"
+    exit 10
+fi
 fullname=$1
 extension="${fullname##*.}"
 filename=${fullname##*/}
@@ -47,26 +52,20 @@ NC='\033[0m'
 
 if [[ -n $compile_command ]] || [[ -n $run_command ]]; then
     if [[ -n $compile_command ]]; then
-        eval "codemd5 -c --file \"$filename\" --args \"$compile_command_orig\""
-        if [[ $? -eq 0 ]] && [[ $p_flag == false ]]; then
-            printf "${GREEN}copmile${NC} files are up to date.\n"
-        else
-            if [[ $p_flag == true ]]; then
-                compile_command="$compile_command >/dev/null 2>&1"
-            fi
-            eval $compile_command
-            if [[ $? -ne 0 ]]; then
-                exit 1
-            fi
-            if [[ $p_flag == false ]]; then
-                printf "${GREEN}compile${NC} $compile_command_orig ${GREEN}done${NC}\n"
-            fi
-            eval "codemd5 -w --file \"$filename\" --args \"$compile_command\""
+        if [[ $p_flag == true ]]; then
+            compile_command="$compile_command >/dev/null 2>&1"
+        fi
+        eval $compile_command
+        if [[ $? -ne 0 ]]; then
+            exit 1
+        fi
+        if [[ $p_flag == false ]]; then
+            printf "${GREEN}compile${NC} $compile_command_orig ${GREEN}done${NC}\n"
         fi
     fi
     if [[ -n $run_command ]]; then
         if [[ $p_flag == false ]]; then
-            echo $run_command_orig
+            printf "${GREEN}run${NC} $run_command_orig\n"
         fi
         eval $run_command
         if [[ $? -ne 0 ]]; then
