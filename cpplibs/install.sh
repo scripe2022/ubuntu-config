@@ -19,7 +19,5 @@ rm -rf $HOME/.local/include/cpglib
 git clone https://github.com/scripe2022/cpglib.git $HOME/.local/include/cpglib
 
 # precompile
-cd $HOME/.local/include/cpglib
-make
-cd /usr/include/x86_64-linux-gnu/c++/13/bits
-sudo g++ stdc++.h -O1 -std=gnu++20 -Wall -Wextra -Wshadow -D_GLIBCXX_ASSERTIONS -fmax-errors=2 -DLOCAL
+make -C $HOME/.local/include/cpglib
+sudo g++ /usr/include/x86_64-linux-gnu/c++/13/bits/stdc++.h -O1 -std=gnu++20 -Wall -Wextra -Wshadow -D_GLIBCXX_ASSERTIONS -fmax-errors=2 -DLOCAL
