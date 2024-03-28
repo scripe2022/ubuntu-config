@@ -1,5 +1,3 @@
-#!/usr/bin/bash
-
 # nlohmann
 rm -rf $HOME/.local/include/nlohmann
 git clone https://github.com/nlohmann/json.git

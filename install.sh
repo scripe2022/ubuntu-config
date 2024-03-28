@@ -1,9 +1,14 @@
-#!/usr/bin/bash
+#!/usr/bin/bash -i
 
 if [ "$(id -u)" -eq 0 ]; then
     echo "cannot run as root" >&2
     exit 1
 fi
+
+[ ! -d "$HOME/.local/include" ] && mkdir -p "$HOME/.local/include"
+[ ! -d "$HOME/.local/bin" ] && mkdir -p "$HOME/.local/bin"
+cat ./bashrc >> $HOME/.bashrc
+source $HOME/.bashrc
 
 sudo apt update
 sudo apt upgrade -y
@@ -29,9 +34,9 @@ sudo apt install -y ibus-pinyin vlc webp
 # chmod +x VMware-Workstation-Full-17.5.0-17198959.x86_64.bundle
 # sudo ./VMware-Workstation-Full-17.5.0-17198959.x86_64.bundle
 
-./asdf/install.sh
-./nautilus-terminal/install.sh
-./nvim/install.sh
-./kitty/install.sh
-./cpplibs/install.sh
-./bin/install.sh
+. ./asdf/install.sh
+. ./nautilus-terminal/install.sh
+. ./nvim/install.sh
+. ./kitty/install.sh
+. ./cpplibs/install.sh
+. ./bin/install.sh

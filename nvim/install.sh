@@ -1,6 +1,4 @@
-#!/usr/bin/bash
-
-sudo apt install -y python3-pynvim
+pip3 install pynvim
 npm install -g neovim
 gem install neovim
 cpanm -n App::cpanminus
