@@ -1,0 +1,35 @@
+avatar
+login google
+tweak - scale
+tweak - capslock
+
+shortcuts:
+switch_terminal
+wmctrl -x -a kitty
+super+1
+
+Firefox
+wmctrl -a firefox
+super+2
+
+python3
+kitty -- bash -c "python3 -c \"import math, code; code.interact(local=locals())\"; exec bash"
+super+3
+
+Calc
+gnome-calculator
+super+4
+
+flameshot
+/usr/bin/flameshot gui
+ctrl+alt+A
+
+ibus engine en
+ibus engine xkb:us::eng
+super+f1
+
+ibus source pinyin
+ibus engine libpinyin
+super+f2
+
+

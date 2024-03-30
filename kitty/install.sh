@@ -1,5 +1,7 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
+cp $SCRIPT_DIR/gitconfig $HOME/.gitconfig
+
 curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin launch=n
 sudo ln -s $HOME/.local/kitty.app/bin/kitty /usr/bin/kitty
 sudo ln -s $HOME/.local/kitty.app/bin/kitten /usr/bin/kitten
