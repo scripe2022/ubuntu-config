@@ -38,3 +38,4 @@ sudo apt remove nautilus-extension-gnome-terminal
 . ./postman/install.sh
 . ./docker/install.sh
 
+
