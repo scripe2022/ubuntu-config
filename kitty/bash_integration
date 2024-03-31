@@ -3,5 +3,6 @@ if [[ "$TERM" == "xterm-kitty" ]]; then
     alias wid="echo $KITTY_WINDOW_ID"
     alias kcat="kitten icat"
     alias kdiff="kitten diff"
+    alias gdiff="it difftool --no-symlinks --dir-diff"
 fi
 

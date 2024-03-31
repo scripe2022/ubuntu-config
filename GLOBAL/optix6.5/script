@@ -1,0 +1,6 @@
+# https://developer.nvidia.com/designworks/optix/downloads/6.5.0/
+# sudo mkdir -p /usr/local/optix6.5
+# chmod +x NVIDIA-OptiX-SDK-6.5.0-linux64.sh
+# sudo ./NVIDIA-OptiX-SDK-6.5.0-linux64.sh --prefix=/usr/local/optix6.5
+# echo "export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/usr/local/optix6.5/lib64" >> ~/.bashrc
+

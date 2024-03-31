@@ -12,7 +12,7 @@ map({ "n", "i", "v" }, "<C-m>", function()
 end, { desc = "Dismiss notifications" })
 
 local quickrun = function()
-    if vim.api.nvim_buf_get_option(0, 'modified') then
+    if vim.api.nvim_buf_get_option(0, "modified") then
         vim.cmd("write")
     end
 
@@ -99,28 +99,98 @@ local run_command = function(command)
 end
 
 local compAndRun = function()
-    if vim.api.nvim_buf_get_option(0, 'modified') then
+    if vim.api.nvim_buf_get_option(0, "modified") then
         vim.cmd("write")
     end
+
+    local buffer_content = table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\n")
+    local match_compile = buffer_content:match("comp%s-:=%s*(.-)%s*\n")
+    if (match_compile == nil) then
+        match_compile = ""
+    end
+    match_compile = match_compile:gsub("^%s*(.-)%s*$", "%1")
+    local match_run = buffer_content:match("run%s-:=%s*(.-)%s*\n")
+    if (match_run == nil) then
+        match_run = ""
+    end
+    match_run = match_run:gsub("^%s*(.-)%s*$", "%1")
+    local match_wid = buffer_content:match("wid%s-:=%s*(.-)%s*\n")
+    if (match_wid == nil) then
+        match_wid = ""
+    end
+    match_wid = match_wid:gsub("^%s*(.-)%s*$", "%1")
+    local match_dir = buffer_content:match("dir%s-:=%s*(.-)%s*\n")
+    if (match_dir == nil) then
+        match_dir = ""
+    end
+    match_dir = match_dir:gsub("^%s*(.-)%s*$", "%1")
 
     local kitten_cmd = "kitty @ ls | jq '.[] | .tabs[] | select(.is_focused == true) | .layout, (.windows | length)'"
 
     local layout, num
     local output = run_command(kitten_cmd)
-    layout, num = output:match("\"(.-)\"\n(%d+)")
+    layout, num = output:match('"(.-)"\n(%d+)')
     num = tonumber(num)
 
-    local command = "quickrun " .. vim.fn.expand("%:t")
+    local command = ""
+    if match_compile ~= "" and match_run ~= "" then
+        command = match_compile .. " && " .. match_run
+    else
+        command = match_run
+    end
+    if command == "" then
+        require("notify")("no command", "error")
+        return
+    end
+
+    local cwd = ""
+    if match_dir ~= "" then
+        if string.sub(match_dir, 1, 1) == "/" or match_dir:match("^%a:") ~= nil then
+            cwd = match_dir
+        else
+            local path_sep = package.config:sub(1, 1)
+            cwd = table.concat({ vim.fn.expand("%:p:h"), match_dir }, path_sep)
+        end
+        cwd = run_command("realpath " .. cwd)
+    end
+
+    local fp, err = io.open("/home/jyh/.cache/quickrun/last-command", "w")
+    if not fp then
+        require("notify")("open file error: " .. tostring(err), "error")
+        return
+    end
+    local record_cwd = cwd
+    if record_cwd == "" then
+        record_cwd = vim.fn.expand("%:p:h")
+    end
+    fp:write(command, "\n", record_cwd, "\n")
+    fp:close()
+
     if layout == "stack" then
         os.execute("kitty @ last-used-layout")
     end
-    if num == 1 then
-        local current_id = os.getenv("KITTY_WINDOW_ID")
-        os.execute("kitten @ launch --cwd=last_reported")
-        os.execute("kitten @ focus-window --match id:" .. current_id)
+    local match_window = "--match recent:1"
+    if match_wid ~= "" then
+        match_window = "--match id:" .. match_wid
     end
-    os.execute("kitten @ action clear_terminal scroll active --match recent:1")
-    os.execute("kitty @ send-text --match recent:1 \"" .. command .. "\n\"")
+    if num == 1 and match_wid == "" then
+        local current_id = os.getenv("KITTY_WINDOW_ID")
+        if cwd == "" then
+            os.execute("kitten @ launch --cwd=last_reported")
+        else
+            os.execute("kitten @ launch --cwd=" .. cwd)
+        end
+        os.execute("kitten @ focus-window --match id:" .. current_id)
+    else
+        if cwd ~= "" then
+            local window_cwd = run_command("kitten @ ls " .. match_window .. " | jq '.[0].tabs[0].windows[0].cwd' | cut -d \'\"\' -f 2")
+            if (window_cwd ~= cwd) then
+                os.execute("kitten @ send-text " .. match_window .. " \"cd " .. cwd .. "\n\"")
+            end
+        end
+    end
+    -- os.execute("kitten @ action " .. match_window ..  " clear_terminal scroll active")
+    os.execute("kitty @ send-text " .. match_window .. " \"" .. command .. '\n"')
 end
 
 map({ "n", "i", "v" }, "<C-`>", compAndRun)
@@ -164,10 +234,10 @@ map("n", "<A-Right>", moveBufferRight, { noremap = true })
 map("n", "<A-Up>", moveBufferUp, { noremap = true })
 map("n", "<A-Down>", moveBufferDown, { noremap = true })
 
-map({ "n", "i", "v" }, "<C-S-Left>", "<cmd>BufferLineMovePrev<cr>")
-map({ "n", "i", "v" }, "<C-S-Right>", "<cmd>BufferLineMoveNext<cr>")
-map({ "n", "i", "v" }, "<S-Left>", "<cmd>BufferLineCyclePrev<cr>")
-map({ "n", "i", "v" }, "<S-Right>", "<cmd>BufferLineCycleNext<cr>")
+map({ "n", "i", "v" }, "<S-Left>", "<cmd>BufferLineMovePrev<cr>")
+map({ "n", "i", "v" }, "<S-Right>", "<cmd>BufferLineMoveNext<cr>")
+-- map({ "n", "i", "v" }, "<S-Left>", "<cmd>BufferLineCyclePrev<cr>")
+-- map({ "n", "i", "v" }, "<S-Right>", "<cmd>BufferLineCycleNext<cr>")
 
 map("n", "<A-1>", function()
     require("bufferline").go_to_buffer(1, true)
@@ -360,10 +430,34 @@ map("n", "<C-a>", "A", { noremap = true })
 map("n", "<A-c>", "<cmd>CopilotChatInPlace<CR>", { desc = "Open chat" })
 
 -- kitty and vim integration
-map("n", "<C-j>", ":KittyNavigateDown<CR>", { noremap = true, silent = true })
-map("n", "<C-k>", ":KittyNavigateUp<CR>", { noremap = true, silent = true })
-map("n", "<C-l>", ":KittyNavigateRight<CR>", { noremap = true, silent = true })
-map("n", "<C-h>", ":KittyNavigateLeft<CR>", { noremap = true, silent = true })
+
 map("n", "<f2>", "<cmd>ZenMode<CR>", { desc = "ZenMode" })
 map("n", "<leader>pmd", "<cmd>MarkdownPreview<CR>", { desc = "Markdown Preview" })
 map("n", "<leader>pms", "<cmd>MarkdownPreviewStop<CR>", { desc = "Markdown Preview" })
+
+-- map("n", "<C-j>", ":KittyNavigateDown<CR>", { noremap = true, silent = true })
+-- map("n", "<C-k>", ":KittyNavigateUp<CR>", { noremap = true, silent = true })
+-- map("n", "<C-l>", ":KittyNavigateRight<CR>", { noremap = true, silent = true })
+-- map("n", "<C-h>", ":KittyNavigateLeft<CR>", { noremap = true, silent = true })
+
+-- resizing splits
+-- amount defaults to 3 if not specified
+-- use absolute values, no + or -
+-- the functions also check for a range,
+-- so for example if you bind `<A-h>` to `resize_left`,
+-- then `10<A-h>` will `resize_left` by `(10 * config.default_amount)`
+vim.keymap.set("n", "<A-S-h>", require("smart-splits").resize_left)
+vim.keymap.set("n", "<A-S-j>", require("smart-splits").resize_down)
+vim.keymap.set("n", "<A-S-k>", require("smart-splits").resize_up)
+vim.keymap.set("n", "<A-S-l>", require("smart-splits").resize_right)
+-- moving between splits
+vim.keymap.set("n", "<C-h>", require("smart-splits").move_cursor_left)
+vim.keymap.set("n", "<C-j>", require("smart-splits").move_cursor_down)
+vim.keymap.set("n", "<C-k>", require("smart-splits").move_cursor_up)
+vim.keymap.set("n", "<C-l>", require("smart-splits").move_cursor_right)
+-- vim.keymap.set('n', '<C-\\>', require('smart-splits').move_cursor_previous)
+-- swapping buffers between windows
+vim.keymap.set("n", "<C-Left>", require("smart-splits").swap_buf_left)
+vim.keymap.set("n", "<C-Down>", require("smart-splits").swap_buf_down)
+vim.keymap.set("n", "<C-Up>", require("smart-splits").swap_buf_up)
+vim.keymap.set("n", "<C-Right>", require("smart-splits").swap_buf_right)

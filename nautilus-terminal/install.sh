@@ -4,3 +4,4 @@ make -C $HOME/.local/nautilus-terminal
 sudo make -C $HOME/.local/nautilus-terminal install-nautilus schema
 gsettings set com.github.stunkymonkey.nautilus-open-any-terminal terminal kitty
 nautilus -q
+
