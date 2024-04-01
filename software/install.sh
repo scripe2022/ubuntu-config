@@ -14,3 +14,5 @@ flatpak install flathub us.zoom.Zoom
 flatpak install flathub org.onlyoffice.desktopeditors
 # upnote
 snap install upnote
+# pika backup
+flatpak install flathub org.gnome.World.PikaBackup
