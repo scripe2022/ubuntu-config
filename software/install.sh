@@ -1,3 +1,4 @@
+flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 # slack
 flatpak install flathub com.slack.Slack
 # todoist
