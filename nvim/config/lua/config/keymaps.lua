@@ -104,22 +104,22 @@ local compAndRun = function()
     end
 
     local buffer_content = table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\n")
-    local match_compile = buffer_content:match("comp%s-:=%s*(.-)%s*\n")
+    local match_compile = buffer_content:match("comp%s-:=(.-)\n")
     if (match_compile == nil) then
         match_compile = ""
     end
     match_compile = match_compile:gsub("^%s*(.-)%s*$", "%1")
-    local match_run = buffer_content:match("run%s-:=%s*(.-)%s*\n")
+    local match_run = buffer_content:match("run%s-:=(.-)\n")
     if (match_run == nil) then
         match_run = ""
     end
     match_run = match_run:gsub("^%s*(.-)%s*$", "%1")
-    local match_wid = buffer_content:match("wid%s-:=%s*(.-)%s*\n")
+    local match_wid = buffer_content:match("wid%s-:=(.-)\n")
     if (match_wid == nil) then
         match_wid = ""
     end
     match_wid = match_wid:gsub("^%s*(.-)%s*$", "%1")
-    local match_dir = buffer_content:match("dir%s-:=%s*(.-)%s*\n")
+    local match_dir = buffer_content:match("dir%s-:=(.-)\n")
     if (match_dir == nil) then
         match_dir = ""
     end
