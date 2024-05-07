@@ -1,8 +1,8 @@
 return {
 	s(
-        "note",
+        "NOTE",
         {
-            t("// NOTE:"),
+            t("// NOTE: "),
             i(1, "")
         }
     )

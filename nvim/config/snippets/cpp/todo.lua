@@ -1,8 +1,8 @@
 return {
 	s(
-        "todo",
+        "TODO",
         {
-            t("// TODO:"),
+            t("// TODO: "),
             i(1, "")
         }
     )

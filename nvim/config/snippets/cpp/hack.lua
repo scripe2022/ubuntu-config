@@ -1,8 +1,8 @@
 return {
 	s(
-        "hack",
+        "HACK",
         {
-            t("// HACK:"),
+            t("// HACK: "),
             i(1, "")
         }
     )

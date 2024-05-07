@@ -1,8 +1,8 @@
 return {
 	s(
-        "fix",
+        "FIX",
         {
-            t("// FIX:"),
+            t("// FIX: "),
             i(1, "")
         }
     )
